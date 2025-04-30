@@ -54,6 +54,6 @@ public class ClientController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client is not present");
         }
         clientService.deleteClient(clientId);
-        return ResponseEntity.ok("The employee has been successfully deleted .. ");
+        return ResponseEntity.ok("The employee has been successssssssssssssssfully deleted .. ");
     }
 }
