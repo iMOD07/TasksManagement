@@ -1,0 +1,10 @@
+For the first time
+git clone https://github.com/iMOD07/TasksManagement.git
+----
+Before Update
+git pull
+-----
+After Update
+git add .
+git commit -m "Update 2025/04/20, 12:10PM"
+git push
