@@ -8,3 +8,7 @@ After Update
 git add .
 git commit -m "Update 2025/04/20, 12:10PM"
 git push
+
+
+git fetch --all
+git reset --hard origin/main
