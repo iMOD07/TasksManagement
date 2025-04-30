@@ -47,7 +47,7 @@ public class ClientController {
 
         if (currentUser.getRole().name().equals("CLIENT")) {
             if (!currentUser.getId().equals(clientId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can not delete another employees Account .");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can not delete another employees Accccccccount .");
             }
         }
         if (!clientService.existsById(clientId)) {

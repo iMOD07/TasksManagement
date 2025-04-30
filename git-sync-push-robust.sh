@@ -1,4 +1,11 @@
 #!/bin/bash
+
+echo "🧠 Checking for changes..."
+if git diff-index --quiet HEAD --; then
+    echo "✅ No changes to commit. Working directory is clean."
+    exit 0
+fi
+
 echo "📝 Staging all changes..."
 git add .
 
