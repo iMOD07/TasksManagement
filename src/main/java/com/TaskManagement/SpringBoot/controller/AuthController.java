@@ -32,7 +32,7 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // create Employee
+    // create Employee2301
     @PostMapping("/register/employee")
     public ResponseEntity<String> registerEmployee(@RequestBody EmployeeRegisterRequest request) {
         UserEmployee employee = employeeService.registerEmployee(
@@ -43,7 +43,7 @@ public class AuthController {
                 request.getDepartment(),
                 request.getJobTitle()
         );
-        return ResponseEntity.ok("Employee registered successfully!");
+        return ResponseEntity.ok("Employee registered successfully .. ");
     }
 
     // Create Client
