@@ -7,6 +7,9 @@ import com.TaskManagement.SpringBoot.repository.TicketClientRepository;
 import com.TaskManagement.SpringBoot.repository.UserClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+
 import java.util.Optional;
 import java.util.List;
 
@@ -18,6 +21,8 @@ public class UserClientService {
 
     @Autowired
     private TicketClientRepository ticketRepository;
+
+
 
     // Get all Client
     public List<UserClient> getAllClients() {
@@ -62,17 +67,21 @@ public class UserClientService {
         return clientRepository.existsById(clientId);
     }
 
+
     // delete Client
+    @Transactional
     public void deleteClient(Long clientId) {
+        UserClient client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Client not found"));
 
-        if (!clientRepository.existsById(clientId)) {
-            throw new ResourceNotFoundException("Client not found");
-        }
-
-        if (ticketRepository.findByAssignedToId(clientId).isEmpty()) {
+        if (ticketRepository.countByClientId(clientId) > 0) {
             throw new ResourceLockedException("Cannot delete Client because there are tickets assigned.");
         }
-        clientRepository.deleteById(clientId);
+
+        clientRepository.delete(client);
     }
+
+
+
 
 }
