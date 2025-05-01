@@ -41,19 +41,19 @@ public class ClientController {
     // Delete Account By CLIENT and ADMIN He Delete Any Users
     @PreAuthorize("hasAnyRole('CLIENT','ADMIN')")
     @DeleteMapping("/{clientId}")
-    public ResponseEntity<String> deleteUserEmployee(@PathVariable Long clientId,
+    public ResponseEntity<String> deleteUserClient(@PathVariable Long clientId,
                                                      Authentication authentication) {
         UserClient currentUser = (UserClient) authentication.getPrincipal();
 
         if (currentUser.getRole().name().equals("CLIENT")) {
             if (!currentUser.getId().equals(clientId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can not delete another employees Account .");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can not delete another Client Account .");
             }
         }
         if (!clientService.existsById(clientId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client is not present");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no Client Here");
         }
         clientService.deleteClient(clientId);
-        return ResponseEntity.ok("The employee has been successfully deleted .. ");
+        return ResponseEntity.ok("The Client has been successfully deleted .. ");
     }
 }

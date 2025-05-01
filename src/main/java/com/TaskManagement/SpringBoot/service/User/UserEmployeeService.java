@@ -67,17 +67,16 @@ public class UserEmployeeService {
 
     // Delete Employee
     public void deleteEmployee(Long employeeId) {
-        if (taskRepository.existsByAssignedToId(employeeId)){
-            throw new ResourceLockedException("Cannot delete employee because there are assigned tasks.");
-        }
 
         if (!employeeRepository.existsById(employeeId)) {
             throw new ResourceNotFoundException("Employee not found");
         }
 
+        if (taskRepository.findByAssignedToId(employeeId).isEmpty()){
+            throw new ResourceLockedException("Cannot delete employee because there are assigned tasks.");
+        }
         employeeRepository.deleteById(employeeId);
     }
-
 
 
     public UserEmployee updateEmployeeRole(Long employeeId, Role newRole) {

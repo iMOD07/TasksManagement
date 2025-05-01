@@ -64,12 +64,15 @@ public class UserClientService {
 
     // delete Client
     public void deleteClient(Long clientId) {
-        if (ticketRepository.existsByAssignedToId(clientId)) {
-            throw new ResourceLockedException("Cannot delete Client because there are has ticket.");
-        }
+
         if (!clientRepository.existsById(clientId)) {
             throw new ResourceNotFoundException("Client not found");
         }
+
+        if (ticketRepository.findByAssignedToId(clientId).isEmpty()) {
+            throw new ResourceLockedException("Cannot delete Client because there are tickets assigned.");
+        }
         clientRepository.deleteById(clientId);
     }
+
 }

@@ -11,11 +11,14 @@ import java.util.List;
 public interface TicketClientRepository extends JpaRepository<TicketClient, Long> {
 
     boolean existsByClient(UserClient client);
-    List<TicketClient> findByAssignedToId(Long userId);
+
+    List<TicketClient> findByAssignedToId(Long id);
 
     List<TicketClient> findByClientId(Long clientId);
 
     // Check for tickets associated with a Clients
     boolean existsByAssignedToId(Long clientId);
+
+
 
 }

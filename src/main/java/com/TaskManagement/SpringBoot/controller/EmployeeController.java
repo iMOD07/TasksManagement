@@ -54,12 +54,11 @@ public class EmployeeController {
             }
         }
         if (!employeeService.existsById(employeeId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee is not present");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no Employee Here");
         }
         employeeService.deleteEmployee(employeeId);
         return ResponseEntity.ok("The employee has been successfully deleted.");
     }
-
 
     // Update Role To SUPERVISOR
     @PreAuthorize("hasRole('ADMIN')")
