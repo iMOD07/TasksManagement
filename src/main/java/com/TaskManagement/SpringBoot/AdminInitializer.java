@@ -14,6 +14,6 @@ public class AdminInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         adminService.createAdminIfNotExist();
-        System.out.println("Admin user has been initialized .");
+        System.out.println("Admin user has been initialized ....");
     }
 }
