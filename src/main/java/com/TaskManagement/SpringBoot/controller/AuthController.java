@@ -6,8 +6,8 @@ import com.TaskManagement.SpringBoot.dto.EmployeeRegisterRequest;
 import com.TaskManagement.SpringBoot.dto.LoginRequest;
 import com.TaskManagement.SpringBoot.model.UserEmployee;
 import com.TaskManagement.SpringBoot.model.UserClient;
-import com.TaskManagement.SpringBoot.service.User.UserEmployeeService;
-import com.TaskManagement.SpringBoot.service.User.UserClientService;
+import com.TaskManagement.SpringBoot.service.User.UserServiceEmployee;
+import com.TaskManagement.SpringBoot.service.User.UserServiceClient;
 import com.TaskManagement.SpringBoot.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +21,10 @@ import java.util.Optional;
 public class AuthController {
 
     @Autowired
-    private UserEmployeeService employeeService;
+    private UserServiceEmployee employeeService;
 
     @Autowired
-    private UserClientService clientService;
+    private UserServiceClient clientService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;

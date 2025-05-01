@@ -1,8 +1,10 @@
 package com.TaskManagement.SpringBoot.controller;
 
+import com.TaskManagement.SpringBoot.exception.ResourceLockedException;
+import com.TaskManagement.SpringBoot.exception.ResourceNotFoundException;
 import com.TaskManagement.SpringBoot.model.Role;
 import com.TaskManagement.SpringBoot.model.UserEmployee;
-import com.TaskManagement.SpringBoot.service.User.UserEmployeeService;
+import com.TaskManagement.SpringBoot.service.User.UserServiceEmployee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +21,7 @@ import java.util.Optional;
 public class EmployeeController {
 
     @Autowired
-    private UserEmployeeService employeeService;
+    private UserServiceEmployee employeeService;
 
 
     // Get All Employees - only ADMIN
@@ -48,17 +50,29 @@ public class EmployeeController {
 
         UserEmployee currentUser = (UserEmployee) authentication.getPrincipal();
 
-        if (currentUser.getRole().name().equals("EMPLOYEE")) {
-            if (!currentUser.getId().equals(employeeId)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You cannot delete another employee's account.");
-            }
+        if (currentUser.getRole().name().equals("EMPLOYEE")
+                && !currentUser.getId().equals(employeeId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to delete another Employee.");
         }
-        if (!employeeService.existsById(employeeId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no Employee Here");
+
+        try {
+            employeeService.deleteEmployee(employeeId);
+            return ResponseEntity.ok("The Employee has been successfully deleted.");
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (ResourceLockedException e) {
+            return  ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (Exception e) {
+            return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("You cannot delete the account because you have Tasks.");
         }
-        employeeService.deleteEmployee(employeeId);
-        return ResponseEntity.ok("The employee has been successfully deleted.");
     }
+
+
+
+
+
+
+
 
     // Update Role To SUPERVISOR
     @PreAuthorize("hasRole('ADMIN')")

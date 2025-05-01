@@ -3,7 +3,7 @@ package com.TaskManagement.SpringBoot.controller;
 import com.TaskManagement.SpringBoot.exception.ResourceLockedException;
 import com.TaskManagement.SpringBoot.exception.ResourceNotFoundException;
 import com.TaskManagement.SpringBoot.model.UserClient;
-import com.TaskManagement.SpringBoot.service.User.UserClientService;
+import com.TaskManagement.SpringBoot.service.User.UserServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ import java.util.Optional;
 public class ClientController {
 
     @Autowired
-    private UserClientService clientService;
+    private UserServiceClient clientService;
 
 
     //Get all Client - only ADMIN
@@ -49,7 +49,8 @@ public class ClientController {
                                                    Authentication authentication) {
         UserClient currentUser = (UserClient) authentication.getPrincipal();
 
-        if (currentUser.getRole().name().equals("CLIENT") && !currentUser.getId().equals(clientId)) {
+        if (currentUser.getRole().name().equals("CLIENT")
+                && !currentUser.getId().equals(clientId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("You do not have permission to delete another client.");
         }

@@ -8,11 +8,13 @@ import com.TaskManagement.SpringBoot.repository.TaskRepository;
 import com.TaskManagement.SpringBoot.repository.UserEmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Optional;
 import java.util.List;
 
 @Service
-public class UserEmployeeService {
+public class UserServiceEmployee {
 
     @Autowired
     private UserEmployeeRepository employeeRepository;
@@ -66,16 +68,15 @@ public class UserEmployeeService {
 
 
     // Delete Employee
+    @Transactional
     public void deleteEmployee(Long employeeId) {
+        UserEmployee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
-        if (!employeeRepository.existsById(employeeId)) {
-            throw new ResourceNotFoundException("Employee not found");
+        if (taskRepository.countByEmployeeId(employeeId) > 0) {
+            throw new ResourceLockedException("Cannot delete Client because there are Tasks.");
         }
-
-        if (taskRepository.findByAssignedToId(employeeId).isEmpty()){
-            throw new ResourceLockedException("Cannot delete employee because there are assigned tasks.");
-        }
-        employeeRepository.deleteById(employeeId);
+        employeeRepository.delete(employee);
     }
 
 

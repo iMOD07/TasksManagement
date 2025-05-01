@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.List;
 
 @Service
-public class UserClientService {
+public class UserServiceClient {
 
     @Autowired
     private UserClientRepository clientRepository;
@@ -80,8 +80,5 @@ public class UserClientService {
 
         clientRepository.delete(client);
     }
-
-
-
 
 }
