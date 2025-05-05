@@ -1,7 +1,9 @@
 package com.TaskManagement.SpringBoot.security;
 
+import com.TaskManagement.SpringBoot.model.AdminUser;
 import com.TaskManagement.SpringBoot.model.UserClient;
 import com.TaskManagement.SpringBoot.model.UserEmployee;
+import com.TaskManagement.SpringBoot.repository.AdminUserRepository;
 import com.TaskManagement.SpringBoot.repository.UserClientRepository;
 import com.TaskManagement.SpringBoot.repository.UserEmployeeRepository;
 import jakarta.servlet.FilterChain;
@@ -31,6 +33,10 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private UserClientRepository clientRepository;
 
+    @Autowired
+    private AdminUserRepository adminUserRepository;
+
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -41,6 +47,24 @@ public class JwtFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
             String email = jwtUtil.extractEmail(token);
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                // UserAdmin
+                Optional<AdminUser> adminOpt = adminUserRepository.findByEmail(email);
+                if (adminOpt.isPresent() && jwtUtil.validateToken(token)) {
+                    AdminUser admin = adminOpt.get();
+                    var auth = new UsernamePasswordAuthenticationToken(
+                            admin,
+                            null,
+                            Collections.singletonList(
+                                    new SimpleGrantedAuthority("ROLE_" + admin.getRole().name())
+                            )
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                    chain.doFilter(request, response);
+                    return;
+                }
+
+
                 // Employee tried first
                 Optional<UserEmployee> empOpt = employeeRepository.findByEmail(email);
                 if (empOpt.isPresent() && jwtUtil.validateToken(token)) {
