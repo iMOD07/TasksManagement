@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
-@SpringBootApplication // 01-05-2025, 04:46 PM
+@SpringBootApplication // 05-05-2025, 09:57 AM
 @EnableMethodSecurity
 public class Application {
 	public static void main(String[] args) {
