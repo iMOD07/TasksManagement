@@ -4,8 +4,10 @@ import com.TaskManagement.SpringBoot.dto.AuthResponse;
 import com.TaskManagement.SpringBoot.dto.ClientRegisterRequest;
 import com.TaskManagement.SpringBoot.dto.EmployeeRegisterRequest;
 import com.TaskManagement.SpringBoot.dto.LoginRequest;
+import com.TaskManagement.SpringBoot.model.AdminUser;
 import com.TaskManagement.SpringBoot.model.UserEmployee;
 import com.TaskManagement.SpringBoot.model.UserClient;
+import com.TaskManagement.SpringBoot.repository.AdminUserRepository;
 import com.TaskManagement.SpringBoot.service.User.UserServiceEmployee;
 import com.TaskManagement.SpringBoot.service.User.UserServiceClient;
 import com.TaskManagement.SpringBoot.security.JwtUtil;
@@ -28,6 +30,9 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AdminUserRepository adminRepo;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -59,6 +64,23 @@ public class AuthController {
         );
         return ResponseEntity.ok("Client registered successfully!");
     }
+
+    // Log in AdminUser
+    @PostMapping("/login/admin")
+    public ResponseEntity<AuthResponse> loginAdmin(@RequestBody LoginRequest request) {
+        Optional<AdminUser> adminOptional = adminRepo.findByEmail(request.getEmail());
+
+        if (adminOptional.isEmpty() ||
+                !passwordEncoder.matches(request.getPassword(), adminOptional.get().getPasswordHash())) {
+            return ResponseEntity.status(401).body(new AuthResponse(null, null));
+        }
+
+        AdminUser admin = adminOptional.get();
+        String token = jwtUtil.generateToken(admin.getEmail(), admin.getRole().name());
+
+        return ResponseEntity.ok(new AuthResponse(token, admin.getRole().name()));
+    }
+
 
     // Log in Employee
     @PostMapping("/login/employee")

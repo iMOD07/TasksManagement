@@ -22,10 +22,10 @@ public class AdminInitializer {
     public void init() {
         if (adminRepo.count() == 0) {
             AdminUser admin = new AdminUser();
-            admin.setEmail("admin@sys.com");
-            admin.setPasswordHash(passwordEncoder.encode("admin123"));
+            admin.setEmail("admin@admin.com");
+            admin.setPasswordHash(passwordEncoder.encode("Aa@102030"));
             adminRepo.save(admin);
-            System.out.println("✅ Default system admin created: admin@sys.com / admin123");
+            System.out.println("✅ Default system admin created: admin@admin.com / Aa@102030");
         }
     }
 }

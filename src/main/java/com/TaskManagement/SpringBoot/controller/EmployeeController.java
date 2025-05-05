@@ -2,7 +2,9 @@ package com.TaskManagement.SpringBoot.controller;
 
 import com.TaskManagement.SpringBoot.exception.ResourceLockedException;
 import com.TaskManagement.SpringBoot.exception.ResourceNotFoundException;
+import com.TaskManagement.SpringBoot.model.AdminUser;
 import com.TaskManagement.SpringBoot.model.Role;
+import com.TaskManagement.SpringBoot.model.UserClient;
 import com.TaskManagement.SpringBoot.model.UserEmployee;
 import com.TaskManagement.SpringBoot.service.User.UserServiceEmployee;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -25,7 +28,7 @@ public class EmployeeController {
 
 
     // Get All Employees - only ADMIN
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE','SUPERVISOR')")
     @GetMapping("/")
     public ResponseEntity<List<UserEmployee>> getAllEmployees() {
         List<UserEmployee> employees = employeeService.getAllEmployees();
@@ -33,7 +36,7 @@ public class EmployeeController {
     }
 
     // Get Employee by ID - only Admin
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE')")
     @GetMapping("/{id}")
     public ResponseEntity<UserEmployee> getEmployeeById(@PathVariable Long id) {
         Optional<UserEmployee> employee = employeeService.getEmployeeById(id);
@@ -43,49 +46,72 @@ public class EmployeeController {
 
 
     // Delete Account by ADMIN and by EMPLOYEE Yourself
-    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE','EMPLOYEE')")
     @DeleteMapping("/{employeeId}")
     public ResponseEntity<String> deleteUserEmployee(@PathVariable Long employeeId,
                                                      Authentication authentication) {
 
-        UserEmployee currentUser = (UserEmployee) authentication.getPrincipal();
+        Object principal = authentication.getPrincipal();
 
-        if (currentUser.getRole().name().equals("EMPLOYEE")
-                && !currentUser.getId().equals(employeeId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to delete another Employee.");
+        if (principal instanceof UserEmployee userEmployee) {
+            boolean isAdminEmployee = userEmployee.getRole().name().equals("ADMIN_EMPLOYEE");
+
+            // Only regular EMPLOYEE can't delete others
+            if (!isAdminEmployee && !userEmployee.getId().equals(employeeId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("You do not have permission to delete another Employee.");
+            }
         }
 
+        // AdminUser or AdminEmployee is allowed to delete
         try {
             employeeService.deleteEmployee(employeeId);
             return ResponseEntity.ok("The Employee has been successfully deleted.");
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (ResourceLockedException e) {
-            return  ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
-            return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("You cannot delete the account because you have Tasks.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("You cannot delete the account because you have Tasks.");
         }
     }
 
 
-
-
-
-
-
-
-    // Update Role To SUPERVISOR
-    @PreAuthorize("hasRole('ADMIN')")
+    // Update Role to SUPERVISOR
+    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE')")
     @PutMapping("/updateRole/{employeeId}")
-    public ResponseEntity<UserEmployee> updateEmployeeRole(@PathVariable Long employeeId,
-                                                           @RequestParam String role) {
+    public ResponseEntity<?> updateEmployeeRole(@PathVariable Long employeeId,
+                                                @RequestParam String role,
+                                                Authentication authentication) {
+
+        Object principal = authentication.getPrincipal();
+
         Role newRole;
         try {
             newRole = Role.valueOf(role.toUpperCase());
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body("Invalid role: " + role);
         }
+
+        // Only allow changing role to SUPERVISOR
+        if (newRole != Role.SUPERVISOR) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Only SUPERVISOR role assignment is allowed.");
+        }
+
+        if (principal instanceof UserEmployee currentUser) {
+            boolean isAdminEmp = currentUser.getRole() == Role.ADMIN_EMPLOYEE;
+
+            // Prevent changing the role for himself
+            if (isAdminEmp && currentUser.getId().equals(employeeId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("You are not allowed to change your own role.");
+            }
+        }
+
         UserEmployee updatedEmployee = employeeService.updateEmployeeRole(employeeId, newRole);
         return ResponseEntity.ok(updatedEmployee);
     }
+
 }

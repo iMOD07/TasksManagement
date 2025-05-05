@@ -1,5 +1,6 @@
 package com.TaskManagement.SpringBoot.service.User.ADMIN;
 
+import com.TaskManagement.SpringBoot.model.Role;
 import com.TaskManagement.SpringBoot.model.UserClient;
 import com.TaskManagement.SpringBoot.repository.UserClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class UserAdminClient {
         admin.setMobileNumber("0503369271");
         admin.setCompanyName("ADMIN");
         admin.setAddress("ADMIN");
-        admin.setRole(com.TaskManagement.SpringBoot.model.Role.ADMIN);
+        admin.setRole(Role.ADMIN_CLIENT);
         return ClientRepository.save(admin);
     }
 }

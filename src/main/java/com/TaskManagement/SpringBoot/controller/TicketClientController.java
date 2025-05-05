@@ -20,7 +20,7 @@ public class TicketClientController {
     @Autowired
     private TicketClientService ticketService;
 
-    @PreAuthorize("hasRole('CLIENT')")
+    @PreAuthorize("hasRole('CLIENT','ADMIN_CLIENT')")
     @PostMapping("/create")
     public ResponseEntity<?> createTicket(@RequestBody TicketRequest req,
                                           Authentication authentication) {
@@ -37,7 +37,7 @@ public class TicketClientController {
     }
 
     // Just ADMIN he Get All Ticket
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN','ADMIN_CLIENT')")
     @GetMapping("/")
     public ResponseEntity<List<TicketClient>> getAllTicket() {
         List<TicketClient> all = ticketService.getAllTicket();
@@ -45,7 +45,7 @@ public class TicketClientController {
         return ResponseEntity.ok(all);
     }
 
-    @PreAuthorize("hasAnyRole('CLIENT','ADMIN')")
+    @PreAuthorize("hasAnyRole('CLIENT','ADMIN','ADMIN_CLIENT')")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<TicketClient>> getUserTickets(@PathVariable("userId") Long userId,
                                                              Authentication authentication) {
@@ -64,7 +64,7 @@ public class TicketClientController {
     }
 
     // Delete ticket
-    @PreAuthorize("hasAnyRole('CLIENT','ADMIN')")
+    @PreAuthorize("hasAnyRole('CLIENT','ADMIN','ADMIN_CLIENT')")
     @DeleteMapping("/{ticketId}")
     public ResponseEntity<String> deleteTicket(@PathVariable Long ticketId,
                                                Authentication authentication) {

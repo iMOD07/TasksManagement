@@ -24,7 +24,7 @@ public class TaskController {
 
 
     // create tasks by ADMIN
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE')")
     @PostMapping("/create")
     public ResponseEntity<Task> createTask(@RequestBody TaskRequest request,
                                            Authentication authentication) {
@@ -43,7 +43,7 @@ public class TaskController {
     }
 
     // Delete Tasks by Admin
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE')")
     @DeleteMapping("/{taskId}")
     public ResponseEntity<String> deleteTask(@PathVariable Long taskId) {
         taskService.deleteTask(taskId);
@@ -51,7 +51,7 @@ public class TaskController {
     }
 
     // Update Tasks by Admin
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE')")
     @PutMapping("/update/{taskId}")
     public ResponseEntity<Task> updateTask(@PathVariable Long taskId, @RequestBody TaskRequest request) {
         Task updatedTask = taskService.updateTask(
@@ -75,7 +75,7 @@ public class TaskController {
 
 
     // Get All Tasks - only ADMIN
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE','SUPERVISOR')")
     @GetMapping("/")
     public ResponseEntity<List<Task>> getAllTasks() {
         return ResponseEntity.ok(taskService.getAllTasks());
@@ -83,7 +83,7 @@ public class TaskController {
 
 
     // Get Employee by ID
-    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE','EMPLOYEE','SUPERVISOR')")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Task>> getUserTasks(@PathVariable Long userId) {
         return ResponseEntity.ok(taskService.getTasksByUser(userId));
@@ -99,7 +99,7 @@ public class TaskController {
     }
 
     // END Task by ADMIN - only ADMIN
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE')")
     @PutMapping("/admin/complete/{taskId}")
     public ResponseEntity<Task> completeTaskByAdmin(@PathVariable Long taskId) {
         Task completedTask = taskService.completeTask(taskId); // تم توحيد طريقة انهاء المهمة لاختلاف التسمية
