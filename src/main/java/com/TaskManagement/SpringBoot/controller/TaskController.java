@@ -1,5 +1,6 @@
 package com.TaskManagement.SpringBoot.controller;
 
+import com.TaskManagement.SpringBoot.model.AdminUser;
 import com.TaskManagement.SpringBoot.model.Task;
 import com.TaskManagement.SpringBoot.dto.TaskRequest;
 import com.TaskManagement.SpringBoot.dto.TransferRequest;
@@ -8,6 +9,7 @@ import com.TaskManagement.SpringBoot.repository.UserClientRepository;
 import com.TaskManagement.SpringBoot.repository.UserEmployeeRepository;
 import com.TaskManagement.SpringBoot.service.Tasks.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -29,7 +31,8 @@ public class TaskController {
     public ResponseEntity<Task> createTask(@RequestBody TaskRequest request,
                                            Authentication authentication) {
 
-        UserEmployee current = (UserEmployee) authentication.getPrincipal();
+        System.out.println("🔐 Authorities: " + authentication.getAuthorities());
+        System.out.println("🔐 Principal class: " + authentication.getPrincipal().getClass().getSimpleName());
 
         Task task = taskService.createTask(
                 request.getTitle(),
@@ -39,7 +42,9 @@ public class TaskController {
                 request.getDueDate(),
                 request.getConnect_to()
         );
+
         return ResponseEntity.ok(task);
+
     }
 
     // Delete Tasks by Admin

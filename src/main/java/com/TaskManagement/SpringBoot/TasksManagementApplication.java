@@ -2,15 +2,18 @@ package com.TaskManagement.SpringBoot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan; // 👈 مهم
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
-@SpringBootApplication // 05-05-2025, 09:57 AM
-@EnableMethodSecurity
-public class Application {
+@SpringBootApplication
+@ComponentScan(basePackages = "com.TaskManagement.SpringBoot") // 👈 ضروري جداً
+@EnableMethodSecurity(prePostEnabled = true)
+public class TasksManagementApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
+		SpringApplication.run(TasksManagementApplication.class, args);
 	}
 }
+
 
 
 /*
