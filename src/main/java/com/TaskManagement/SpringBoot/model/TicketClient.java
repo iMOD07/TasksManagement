@@ -33,5 +33,9 @@ public class TicketClient {
     @JoinColumn(name = "client_id", nullable = false)
     private UserClient client;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TicketStatus status = TicketStatus.OPEN;
+
 
 }

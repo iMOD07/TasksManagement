@@ -1,13 +1,14 @@
 package com.TaskManagement.SpringBoot.controller;
 
+import com.TaskManagement.SpringBoot.SecurityUtils;
 import com.TaskManagement.SpringBoot.dto.TicketRequest;
+import com.TaskManagement.SpringBoot.model.Role;
 import com.TaskManagement.SpringBoot.model.TicketClient;
 import com.TaskManagement.SpringBoot.model.UserClient;
 import com.TaskManagement.SpringBoot.service.Ticket.TicketClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.UserCache;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
@@ -20,7 +21,8 @@ public class TicketClientController {
     @Autowired
     private TicketClientService ticketService;
 
-    @PreAuthorize("hasRole('CLIENT','ADMIN_CLIENT')")
+
+    @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/create")
     public ResponseEntity<?> createTicket(@RequestBody TicketRequest req,
                                           Authentication authentication) {
@@ -37,40 +39,44 @@ public class TicketClientController {
     }
 
     // Just ADMIN he Get All Ticket
-    @PreAuthorize("hasRole('ADMIN','ADMIN_CLIENT')")
-    @GetMapping("/")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping
     public ResponseEntity<List<TicketClient>> getAllTicket() {
         List<TicketClient> all = ticketService.getAllTicket();
         System.out.println("admin Admin fetched all tickets, count = " + all.size());
         return ResponseEntity.ok(all);
     }
 
-    @PreAuthorize("hasAnyRole('CLIENT','ADMIN','ADMIN_CLIENT')")
+    @PreAuthorize("hasAnyRole('CLIENT','ADMIN')")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<TicketClient>> getUserTickets(@PathVariable("userId") Long userId,
                                                              Authentication authentication) {
-        // Extract User
-        UserClient currentClient = (UserClient) authentication.getPrincipal();
-        // are you ADMIN ?
+
+        UserClient current = SecurityUtils.getCurrentClient(authentication);
+
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        List<TicketClient> tickets = ticketService.getTicketsByUser(userId, currentClient, isAdmin);
-        System.out.println("User " + currentClient.getId() +
+        List<TicketClient> tickets = ticketService.getTicketsByUser(userId, current, isAdmin);
+
+        System.out.println("User " + current.getId() +
                 (isAdmin ? " (ADMIN)" : "") +
-                "fetched tickets for user" + userId +
+                " fetched tickets for user " + userId +
                 ", count = " + tickets.size());
+
         return ResponseEntity.ok(tickets);
     }
 
+
     // Delete ticket
-    @PreAuthorize("hasAnyRole('CLIENT','ADMIN','ADMIN_CLIENT')")
+    @PreAuthorize("hasAnyRole('CLIENT','ADMIN')")
     @DeleteMapping("/{ticketId}")
     public ResponseEntity<String> deleteTicket(@PathVariable Long ticketId,
                                                Authentication authentication) {
         UserClient currentUser = (UserClient) authentication.getPrincipal();
 
-        if (currentUser.getRole().name().equals("CLIENT")) {
+
+        if (currentUser.getRole() == Role.CLIENT){
             // Client: Delete only his tickets
             ticketService.deleteTicket(ticketId, currentUser.getId());
         } else if (currentUser.getRole().name().equals("ADMIN")) {

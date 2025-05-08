@@ -3,7 +3,7 @@ package com.TaskManagement.SpringBoot.security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;    // <-- تمّ التعديل هنا
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,20 +12,20 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
+
     @Value("${jwt.secret}")
     private String base64Secret;
 
     private Key key;
 
+    private static final long EXPIRATION_TIME = 86400000; // 1 يوم
+
     @PostConstruct
     public void init() {
         byte[] secretBytes = Decoders.BASE64.decode(base64Secret.trim());
         this.key = Keys.hmacShaKeyFor(secretBytes);
-        System.out.println("JWT key initialized, length=" + secretBytes.length);
+        System.out.println("✅ JWT key initialized, length = " + secretBytes.length);
     }
-
-    private static final long EXPIRATION_TIME = 86400000; // 1 day
-
 
     public String generateToken(String email, String role) {
         return Jwts.builder()

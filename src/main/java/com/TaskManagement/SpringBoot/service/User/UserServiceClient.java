@@ -2,13 +2,14 @@ package com.TaskManagement.SpringBoot.service.User;
 
 import com.TaskManagement.SpringBoot.exception.ResourceLockedException;
 import com.TaskManagement.SpringBoot.exception.ResourceNotFoundException;
-import com.TaskManagement.SpringBoot.model.UserClient;
 import com.TaskManagement.SpringBoot.repository.TicketClientRepository;
-import com.TaskManagement.SpringBoot.repository.UserClientRepository;
+import com.TaskManagement.SpringBoot.repository.Users.UserClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.TaskManagement.SpringBoot.model.Role;
+import com.TaskManagement.SpringBoot.model.UserClient;
+import com.TaskManagement.SpringBoot.repository.Users.UserEmployeeRepository;
 
 import java.util.Optional;
 import java.util.List;
@@ -22,6 +23,31 @@ public class UserServiceClient {
     @Autowired
     private TicketClientRepository ticketRepository;
 
+    // Register Client
+    public UserClient registerClient(String fullName,
+                                     String email,
+                                     String passwordHash,
+                                     String mobileNumber,
+                                     String companyName,
+                                     String address) {
+        UserClient client = new UserClient();
+        client.setFullName(fullName);
+        client.setEmail(email);
+        client.setPasswordHash(passwordHash);
+        client.setMobileNumber(mobileNumber);
+        client.setCompanyName(companyName);
+        client.setAddress(address);
+        client.setRole(Role.CLIENT);
+        return clientRepository.save(client);
+    }
+
+    public Optional<UserClient> findByEmail(String email) {
+        return clientRepository.findByEmail(email);
+    }
+
+    public Optional<UserClient> findById(Long id) {
+        return clientRepository.findById(id);
+    }
 
 
     // Get all Client
@@ -34,34 +60,6 @@ public class UserServiceClient {
         return clientRepository.findById(id);
     }
 
-    // Function to register the client as it exists
-    public UserClient registerClient(String fullName,
-                                     String email,
-                                     String passwordHash,
-                                     String mobileNumber,
-                                     String companyName,
-                                     String address) {
-        if (clientRepository.findByEmail(email).isPresent()) {
-            throw new RuntimeException("Email already exists");
-        }
-        if (clientRepository.findByMobileNumber(mobileNumber).isPresent()) {
-            throw new RuntimeException("Mobile Number already exists");
-        }
-        UserClient client = new UserClient();
-        client.setFullName(fullName);
-        client.setEmail(email);
-        client.setPasswordHash(passwordHash);
-        client.setMobileNumber(mobileNumber);
-        client.setCompanyName(companyName);
-        client.setAddress(address);
-        client.setRole(com.TaskManagement.SpringBoot.model.Role.CLIENT);
-        return clientRepository.save(client);
-    }
-
-
-    public Optional<UserClient> findByEmail(String email) {
-        return clientRepository.findByEmail(email);
-    }
 
     public boolean existsById(Long clientId) {
         return clientRepository.existsById(clientId);

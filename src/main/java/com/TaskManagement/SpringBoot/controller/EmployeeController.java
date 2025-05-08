@@ -2,9 +2,7 @@ package com.TaskManagement.SpringBoot.controller;
 
 import com.TaskManagement.SpringBoot.exception.ResourceLockedException;
 import com.TaskManagement.SpringBoot.exception.ResourceNotFoundException;
-import com.TaskManagement.SpringBoot.model.AdminUser;
 import com.TaskManagement.SpringBoot.model.Role;
-import com.TaskManagement.SpringBoot.model.UserClient;
 import com.TaskManagement.SpringBoot.model.UserEmployee;
 import com.TaskManagement.SpringBoot.service.User.UserServiceEmployee;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 
@@ -54,7 +51,7 @@ public class EmployeeController {
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof UserEmployee userEmployee) {
-            boolean isAdminEmployee = userEmployee.getRole().name().equals("ADMIN_EMPLOYEE");
+            boolean isAdminEmployee = userEmployee.getRole() == Role.ADMIN;
 
             // Only regular EMPLOYEE can't delete others
             if (!isAdminEmployee && !userEmployee.getId().equals(employeeId)) {
@@ -101,7 +98,7 @@ public class EmployeeController {
         }
 
         if (principal instanceof UserEmployee currentUser) {
-            boolean isAdminEmp = currentUser.getRole() == Role.ADMIN_EMPLOYEE;
+            boolean isAdminEmp = currentUser.getRole() == Role.ADMIN;
 
             // Prevent changing the role for himself
             if (isAdminEmp && currentUser.getId().equals(employeeId)) {

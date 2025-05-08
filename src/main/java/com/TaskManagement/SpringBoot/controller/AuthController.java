@@ -4,13 +4,11 @@ import com.TaskManagement.SpringBoot.dto.AuthResponse;
 import com.TaskManagement.SpringBoot.dto.ClientRegisterRequest;
 import com.TaskManagement.SpringBoot.dto.EmployeeRegisterRequest;
 import com.TaskManagement.SpringBoot.dto.LoginRequest;
-import com.TaskManagement.SpringBoot.model.AdminUser;
-import com.TaskManagement.SpringBoot.model.UserEmployee;
-import com.TaskManagement.SpringBoot.model.UserClient;
-import com.TaskManagement.SpringBoot.repository.AdminUserRepository;
-import com.TaskManagement.SpringBoot.service.User.UserServiceEmployee;
-import com.TaskManagement.SpringBoot.service.User.UserServiceClient;
+import com.TaskManagement.SpringBoot.model.*;
+import com.TaskManagement.SpringBoot.repository.Users.AdminUserRepository;
 import com.TaskManagement.SpringBoot.security.JwtUtil;
+import com.TaskManagement.SpringBoot.service.User.UserServiceClient;
+import com.TaskManagement.SpringBoot.service.User.UserServiceEmployee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,15 +27,15 @@ public class AuthController {
     private UserServiceClient clientService;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private AdminUserRepository adminRepo;
 
     @Autowired
-    private AdminUserRepository adminRepo;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtUtil jwtUtil;
 
-    // create Employe2222222
+    // Register Employee
     @PostMapping("/register/employee")
     public ResponseEntity<String> registerEmployee(@RequestBody EmployeeRegisterRequest request) {
         UserEmployee employee = employeeService.registerEmployee(
@@ -48,10 +46,10 @@ public class AuthController {
                 request.getDepartment(),
                 request.getJobTitle()
         );
-        return ResponseEntity.ok("Employee registered successfully .. ");
+        return ResponseEntity.ok("✅ Employee registered successfully.");
     }
 
-    // Create Client
+    // Register Client
     @PostMapping("/register/client")
     public ResponseEntity<String> registerClient(@RequestBody ClientRegisterRequest request) {
         UserClient client = clientService.registerClient(
@@ -62,10 +60,10 @@ public class AuthController {
                 request.getCompanyName(),
                 request.getAddress()
         );
-        return ResponseEntity.ok("Client registered successfully!");
+        return ResponseEntity.ok("✅ Client registered successfully.");
     }
 
-    // Log in AdminUser
+    // Login Admin
     @PostMapping("/login/admin")
     public ResponseEntity<AuthResponse> loginAdmin(@RequestBody LoginRequest request) {
         Optional<AdminUser> adminOptional = adminRepo.findByEmail(request.getEmail());
@@ -81,31 +79,35 @@ public class AuthController {
         return ResponseEntity.ok(new AuthResponse(token, admin.getRole().name()));
     }
 
-
-    // Log in Employee
+    // Login Employee
     @PostMapping("/login/employee")
     public ResponseEntity<AuthResponse> loginEmployee(@RequestBody LoginRequest request) {
         Optional<UserEmployee> employeeOptional = employeeService.findByEmail(request.getEmail());
+
         if (employeeOptional.isEmpty() ||
                 !passwordEncoder.matches(request.getPassword(), employeeOptional.get().getPasswordHash())) {
             return ResponseEntity.status(401).body(new AuthResponse(null, null));
         }
+
         UserEmployee employee = employeeOptional.get();
         String token = jwtUtil.generateToken(employee.getEmail(), employee.getRole().name());
+
         return ResponseEntity.ok(new AuthResponse(token, employee.getRole().name()));
     }
 
-    // Log in Client
+    // Login Client
     @PostMapping("/login/client")
     public ResponseEntity<AuthResponse> loginClient(@RequestBody LoginRequest request) {
         Optional<UserClient> clientOptional = clientService.findByEmail(request.getEmail());
+
         if (clientOptional.isEmpty() ||
                 !passwordEncoder.matches(request.getPassword(), clientOptional.get().getPasswordHash())) {
             return ResponseEntity.status(401).body(new AuthResponse(null, null));
         }
+
         UserClient client = clientOptional.get();
         String token = jwtUtil.generateToken(client.getEmail(), client.getRole().name());
+
         return ResponseEntity.ok(new AuthResponse(token, client.getRole().name()));
     }
-
 }

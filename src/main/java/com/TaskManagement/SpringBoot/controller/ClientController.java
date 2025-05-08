@@ -2,6 +2,7 @@ package com.TaskManagement.SpringBoot.controller;
 
 import com.TaskManagement.SpringBoot.exception.ResourceLockedException;
 import com.TaskManagement.SpringBoot.exception.ResourceNotFoundException;
+import com.TaskManagement.SpringBoot.model.Role;
 import com.TaskManagement.SpringBoot.model.UserClient;
 import com.TaskManagement.SpringBoot.service.User.UserServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 
-
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -26,15 +25,15 @@ public class ClientController {
 
 
     //Get all Client - only ADMIN
-    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_CLIENT','SUPERVISOR')")
-    @GetMapping("/")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
+    @GetMapping
     public ResponseEntity<List<UserClient>> getAllClients() {
         List<UserClient> clients = clientService.getAllClients();
         return ResponseEntity.ok(clients);
     }
 
     // Get Client By ID - only ADMIN
-    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_CLIENT','SUPERVISOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     @GetMapping("/{id}")
     public ResponseEntity<UserClient> getClientById(@PathVariable Long id) {
         Optional<UserClient> client = clientService.getClientById(id);
@@ -44,7 +43,7 @@ public class ClientController {
 
 
     // Delete Account By CLIENT and ADMIN He Delete Any Users
-    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_CLIENT','CLIENT')")
+    @PreAuthorize("hasAnyRole('ADMIN','CLIENT')")
     @DeleteMapping("/{clientId}")
     public ResponseEntity<String> deleteUserClient(@PathVariable Long clientId,
                                                    Authentication authentication) {
@@ -52,14 +51,13 @@ public class ClientController {
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof UserClient userClient) {
-            boolean isAdminClient = userClient.getRole().name().equals("ADMIN_CLIENT");
+            boolean isAdminClient = userClient.getRole() == Role.ADMIN;
 
             if (!isAdminClient && !userClient.getId().equals(clientId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body("You do not have permission to delete another CLIENT.");
             }
         }
-
 
 
         try {

@@ -1,15 +1,10 @@
 package com.TaskManagement.SpringBoot.controller;
 
-import com.TaskManagement.SpringBoot.model.AdminUser;
 import com.TaskManagement.SpringBoot.model.Task;
 import com.TaskManagement.SpringBoot.dto.TaskRequest;
 import com.TaskManagement.SpringBoot.dto.TransferRequest;
-import com.TaskManagement.SpringBoot.model.UserEmployee;
-import com.TaskManagement.SpringBoot.repository.UserClientRepository;
-import com.TaskManagement.SpringBoot.repository.UserEmployeeRepository;
 import com.TaskManagement.SpringBoot.service.Tasks.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -26,13 +21,10 @@ public class TaskController {
 
 
     // create tasks by ADMIN
-    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<Task> createTask(@RequestBody TaskRequest request,
                                            Authentication authentication) {
-
-        System.out.println("🔐 Authorities: " + authentication.getAuthorities());
-        System.out.println("🔐 Principal class: " + authentication.getPrincipal().getClass().getSimpleName());
 
         Task task = taskService.createTask(
                 request.getTitle(),
@@ -48,7 +40,7 @@ public class TaskController {
     }
 
     // Delete Tasks by Admin
-    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{taskId}")
     public ResponseEntity<String> deleteTask(@PathVariable Long taskId) {
         taskService.deleteTask(taskId);
@@ -56,7 +48,7 @@ public class TaskController {
     }
 
     // Update Tasks by Admin
-    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update/{taskId}")
     public ResponseEntity<Task> updateTask(@PathVariable Long taskId, @RequestBody TaskRequest request) {
         Task updatedTask = taskService.updateTask(
@@ -80,8 +72,8 @@ public class TaskController {
 
 
     // Get All Tasks - only ADMIN
-    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE','SUPERVISOR')")
-    @GetMapping("/")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
+    @GetMapping
     public ResponseEntity<List<Task>> getAllTasks() {
         return ResponseEntity.ok(taskService.getAllTasks());
     }
@@ -104,7 +96,7 @@ public class TaskController {
     }
 
     // END Task by ADMIN - only ADMIN
-    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/admin/complete/{taskId}")
     public ResponseEntity<Task> completeTaskByAdmin(@PathVariable Long taskId) {
         Task completedTask = taskService.completeTask(taskId); // تم توحيد طريقة انهاء المهمة لاختلاف التسمية

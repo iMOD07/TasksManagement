@@ -1,12 +1,9 @@
 package com.TaskManagement.SpringBoot.service.Ticket;
 
-import com.TaskManagement.SpringBoot.model.Role;
-import com.TaskManagement.SpringBoot.model.TicketClient;
-import com.TaskManagement.SpringBoot.model.UserClient;
-import com.TaskManagement.SpringBoot.model.UserEmployee;
+import com.TaskManagement.SpringBoot.model.*;
 import com.TaskManagement.SpringBoot.repository.TicketClientRepository;
-import com.TaskManagement.SpringBoot.repository.UserClientRepository;
-import com.TaskManagement.SpringBoot.repository.UserEmployeeRepository;
+import com.TaskManagement.SpringBoot.repository.Users.UserClientRepository;
+import com.TaskManagement.SpringBoot.repository.Users.UserEmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -37,22 +34,23 @@ public class TicketClientService {
         UserClient client = clientRepository.findByEmail(clientEmail)
                 .orElseThrow(() -> new RuntimeException("Client not found"));
 
-        // Make sure He hasn't created a ticket before
-        if (ticketRepository.existsByClient(client)) {
-            throw new RuntimeException("You have an existing ticket.");
+        // 🟡 تأكد فقط من عدم وجود تذكرة مفتوحة
+        if (ticketRepository.existsByClientAndStatus(client, "OPEN")) {
+            throw new RuntimeException("You already have an open ticket.");
         }
 
-        // Find the first Admin to assign the ticket to .
-        UserEmployee admin = employeeRepository.findByRole(Role.ADMIN)
-                .stream().findFirst()
+        // 🔵 جلب أول مسؤول مباشرة بدون تحميل الكل
+        UserEmployee admin = employeeRepository.findFirstByRole(Role.ADMIN)
                 .orElseThrow(() -> new RuntimeException("No ADMIN user found"));
 
-        // Create Ticket .
+        // 🟢 إنشاء التذكرة
         TicketClient ticket = new TicketClient();
         ticket.setTitle(title);
         ticket.setDescription(description);
         ticket.setAssignedTo(admin);
         ticket.setClient(client);
+        ticket.setStatus(TicketStatus.OPEN); // عند الإنشاء// ⚠️ تأكد من وجود هذا الحقل في `TicketClient`
+
         return ticketRepository.save(ticket);
     }
 

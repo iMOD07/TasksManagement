@@ -1,30 +1,17 @@
 package com.TaskManagement.SpringBoot.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users_employees")
+@Table(name = "user_employees")
 @Getter
 @Setter
-public class UserEmployee {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column(nullable = false)
-    private String fullName;
-
-    @Column(nullable = false)
-    private String passwordHash;
-
-    @Column(nullable = false, unique = true)
-    private String mobileNumber;
+public class UserEmployee extends User {
 
     @Column(nullable = false)
     private String department;
@@ -32,7 +19,4 @@ public class UserEmployee {
     @Column(nullable = false)
     private String jobTitle;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role ;
 }

@@ -24,6 +24,8 @@ public interface TicketClientRepository extends JpaRepository<TicketClient, Long
     @Query("SELECT COUNT(t) FROM TicketClient t WHERE t.assignedTo.id = :clientId")
     long countByClientId(@Param("clientId") Long clientId);
 
+    boolean existsByClientAndStatus(UserClient client, String status);
+
 
 
 
