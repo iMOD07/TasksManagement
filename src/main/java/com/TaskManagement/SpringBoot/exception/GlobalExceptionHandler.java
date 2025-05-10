@@ -22,5 +22,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
+
+    /*
+    @RestControllerAdvice
+    public class GlobalExceptionHandler {
+        @ExceptionHandler(DataIntegrityViolationException.class)
+        public ResponseEntity<Map<String,String>> handleDup(DataIntegrityViolationException ex) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "This email is already registered."));
+        }
+    }
+                * */
 }
 

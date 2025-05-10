@@ -4,6 +4,7 @@ import com.TaskManagement.SpringBoot.SecurityUtils;
 import com.TaskManagement.SpringBoot.dto.TicketRequest;
 import com.TaskManagement.SpringBoot.model.Role;
 import com.TaskManagement.SpringBoot.model.TicketClient;
+import com.TaskManagement.SpringBoot.model.TicketStatus;
 import com.TaskManagement.SpringBoot.model.UserClient;
 import com.TaskManagement.SpringBoot.service.Ticket.TicketClientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,17 @@ public class TicketClientController {
         );
         return ResponseEntity.ok(created);
     }
+
+
+    // Update Ticket close and open
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/status/{ticketId}")
+    public ResponseEntity<TicketClient> updateTicketStatus(@PathVariable Long ticketId,
+                                                           @RequestParam TicketStatus status) {
+        TicketClient updated = ticketService.updateTicketStatus(ticketId, status);
+        return ResponseEntity.ok(updated);
+    }
+
 
     // Just ADMIN he Get All Ticket
     @PreAuthorize("hasRole('ADMIN')")

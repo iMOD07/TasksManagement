@@ -15,4 +15,6 @@ public interface UserEmployeeRepository extends JpaRepository<UserEmployee, Long
     Collection<Object> findByRole(Role role);
     Optional<UserEmployee> findFirstByRole(Role role);
 
+    Optional<UserEmployee> findByMobileNumber(String mobileNumber);
+
 }

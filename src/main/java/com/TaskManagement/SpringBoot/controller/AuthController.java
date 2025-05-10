@@ -6,13 +6,16 @@ import com.TaskManagement.SpringBoot.dto.EmployeeRegisterRequest;
 import com.TaskManagement.SpringBoot.dto.LoginRequest;
 import com.TaskManagement.SpringBoot.model.*;
 import com.TaskManagement.SpringBoot.repository.Users.AdminUserRepository;
+import com.TaskManagement.SpringBoot.repository.Users.UserClientRepository;
 import com.TaskManagement.SpringBoot.security.JwtUtil;
 import com.TaskManagement.SpringBoot.service.User.UserServiceClient;
 import com.TaskManagement.SpringBoot.service.User.UserServiceEmployee;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -33,6 +36,9 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
+    private UserClientRepository clientRepository;
+
+    @Autowired
     private JwtUtil jwtUtil;
 
     // Register Employee
@@ -49,9 +55,12 @@ public class AuthController {
         return ResponseEntity.ok("✅ Employee registered successfully.");
     }
 
+
+
     // Register Client
     @PostMapping("/register/client")
     public ResponseEntity<String> registerClient(@RequestBody ClientRegisterRequest request) {
+
         UserClient client = clientService.registerClient(
                 request.getFullName(),
                 request.getEmail(),
@@ -62,6 +71,7 @@ public class AuthController {
         );
         return ResponseEntity.ok("✅ Client registered successfully.");
     }
+
 
     // Login Admin
     @PostMapping("/login/admin")
@@ -78,6 +88,7 @@ public class AuthController {
 
         return ResponseEntity.ok(new AuthResponse(token, admin.getRole().name()));
     }
+
 
     // Login Employee
     @PostMapping("/login/employee")

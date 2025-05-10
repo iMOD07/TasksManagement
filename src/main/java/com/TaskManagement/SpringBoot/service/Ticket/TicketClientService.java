@@ -73,6 +73,15 @@ public class TicketClientService {
         ticketRepository.delete(ticket);
     }
 
+    public TicketClient updateTicketStatus(Long ticketId, TicketStatus newStatus) {
+        TicketClient ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+        ticket.setStatus(newStatus);
+        return ticketRepository.save(ticket);
+    }
+
+
 
 
     // Just Admin He Get All Ticket
