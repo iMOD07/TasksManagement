@@ -11,11 +11,9 @@ import com.TaskManagement.SpringBoot.security.JwtUtil;
 import com.TaskManagement.SpringBoot.service.User.UserServiceClient;
 import com.TaskManagement.SpringBoot.service.User.UserServiceEmployee;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -56,7 +54,6 @@ public class AuthController {
     }
 
 
-
     // Register Client
     @PostMapping("/register/client")
     public ResponseEntity<String> registerClient(@RequestBody ClientRegisterRequest request) {
@@ -73,7 +70,6 @@ public class AuthController {
     }
 
 
-
     @PostMapping("/login/admin")
     public ResponseEntity<AuthResponse> loginAdmin(@RequestBody LoginRequest request) {
         Optional<AdminUser> adminOptional = adminRepo.findByEmail(request.getEmail());
@@ -88,7 +84,6 @@ public class AuthController {
 
         return ResponseEntity.ok(new AuthResponse(token, admin.getRole().name(), admin.getFullName()));
     }
-
 
 
     // Login Employee

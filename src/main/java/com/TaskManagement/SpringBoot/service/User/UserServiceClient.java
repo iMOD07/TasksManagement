@@ -39,10 +39,23 @@ public class UserServiceClient {
                                      String companyName,
                                      String address) {
 
+        if (email == null || email.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required");
+        }
+
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new EmailAlreadyExistsException("This email is already registered.");
+        }
+
         if (mobileNumber.length() != 10 ) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "You must enter only 10 numbers.");
         }
+
+        if (userRepository.existsByMobileNumber(mobileNumber)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This mobile number is already registered.");
+        }
+
 
         UserClient client = new UserClient();
         client.setFullName(fullName);

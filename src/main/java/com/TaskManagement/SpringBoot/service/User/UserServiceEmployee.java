@@ -1,5 +1,6 @@
 package com.TaskManagement.SpringBoot.service.User;
 
+import com.TaskManagement.SpringBoot.exception.EmailAlreadyExistsException;
 import com.TaskManagement.SpringBoot.exception.ResourceLockedException;
 import com.TaskManagement.SpringBoot.exception.ResourceNotFoundException;
 import com.TaskManagement.SpringBoot.model.Role;
@@ -36,6 +37,19 @@ public class UserServiceEmployee {
                                          String mobileNumber,
                                          String department,
                                          String jobTitle) {
+
+        if (email == null || email.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required.");
+        }
+
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new EmailAlreadyExistsException("This email is already registered.");
+        }
+
+
+        if (userRepository.existsByMobileNumber(mobileNumber)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This mobile number is already registered.");
+        }
 
         if (mobileNumber.length() != 10 ) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

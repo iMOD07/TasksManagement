@@ -41,7 +41,6 @@ public class ClientController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-
     // Delete Account By CLIENT and ADMIN He Delete Any Users
     @PreAuthorize("hasAnyRole('ADMIN','CLIENT')")
     @DeleteMapping("/{clientId}")
