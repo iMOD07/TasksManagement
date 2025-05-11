@@ -73,7 +73,7 @@ public class AuthController {
     }
 
 
-    // Login Admin
+    /*/ Login Admin with out Full Name
     @PostMapping("/login/admin")
     public ResponseEntity<AuthResponse> loginAdmin(@RequestBody LoginRequest request) {
         Optional<AdminUser> adminOptional = adminRepo.findByEmail(request.getEmail());
@@ -87,7 +87,25 @@ public class AuthController {
         String token = jwtUtil.generateToken(admin.getEmail(), admin.getRole().name());
 
         return ResponseEntity.ok(new AuthResponse(token, admin.getRole().name()));
+    } */
+
+
+    @PostMapping("/login/admin")
+    public ResponseEntity<AuthResponse> loginAdmin(@RequestBody LoginRequest request) {
+        Optional<AdminUser> adminOptional = adminRepo.findByEmail(request.getEmail());
+
+        if (adminOptional.isEmpty() ||
+                !passwordEncoder.matches(request.getPassword(), adminOptional.get().getPasswordHash())) {
+            return ResponseEntity.status(401).body(new AuthResponse(null, null, null));
+        }
+
+        AdminUser admin = adminOptional.get();
+        String token = jwtUtil.generateToken(admin.getEmail(), admin.getRole().name(), admin.getFullName());
+
+        return ResponseEntity.ok(new AuthResponse(token, admin.getRole().name(), admin.getFullName()));
     }
+
+
 
 
     // Login Employee
@@ -97,13 +115,13 @@ public class AuthController {
 
         if (employeeOptional.isEmpty() ||
                 !passwordEncoder.matches(request.getPassword(), employeeOptional.get().getPasswordHash())) {
-            return ResponseEntity.status(401).body(new AuthResponse(null, null));
+            return ResponseEntity.status(401).body(new AuthResponse(null, null, null));
         }
 
         UserEmployee employee = employeeOptional.get();
-        String token = jwtUtil.generateToken(employee.getEmail(), employee.getRole().name());
+        String token = jwtUtil.generateToken(employee.getEmail(), employee.getRole().name(), employee.getFullName());
 
-        return ResponseEntity.ok(new AuthResponse(token, employee.getRole().name()));
+        return ResponseEntity.ok(new AuthResponse(token, employee.getRole().name(), employee.getFullName()));
     }
 
     // Login Client
@@ -113,12 +131,12 @@ public class AuthController {
 
         if (clientOptional.isEmpty() ||
                 !passwordEncoder.matches(request.getPassword(), clientOptional.get().getPasswordHash())) {
-            return ResponseEntity.status(401).body(new AuthResponse(null, null));
+            return ResponseEntity.status(401).body(new AuthResponse(null, null, null));
         }
 
         UserClient client = clientOptional.get();
-        String token = jwtUtil.generateToken(client.getEmail(), client.getRole().name());
+        String token = jwtUtil.generateToken(client.getEmail(), client.getRole().name(), client.getFullName());
 
-        return ResponseEntity.ok(new AuthResponse(token, client.getRole().name()));
+        return ResponseEntity.ok(new AuthResponse(token, client.getRole().name(), client.getFullName()));
     }
 }

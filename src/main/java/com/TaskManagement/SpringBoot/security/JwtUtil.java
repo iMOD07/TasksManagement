@@ -27,10 +27,11 @@ public class JwtUtil {
         System.out.println("✅ JWT key initialized, length = " + secretBytes.length);
     }
 
-    public String generateToken(String email, String role) {
+    public String generateToken(String email, String role, String fullName) {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role)
+                .claim("fullName", fullName)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
