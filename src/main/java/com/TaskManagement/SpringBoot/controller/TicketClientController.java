@@ -23,6 +23,16 @@ public class TicketClientController {
     private TicketClientService ticketService;
 
 
+
+    @PreAuthorize("hasRole('CLIENT')")
+    @PostMapping("/create")
+    public ResponseEntity<TicketClient> create(@RequestBody TicketRequest request) {
+        TicketClient ticket = ticketService.createTicket(request);
+        return ResponseEntity.ok(ticket);
+    }
+
+
+    /*
     @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/create")
     public ResponseEntity<?> createTicket(@RequestBody TicketRequest req,
@@ -38,6 +48,17 @@ public class TicketClientController {
         );
         return ResponseEntity.ok(created);
     }
+
+
+         @PreAuthorize("hasRole('CLIENT')")
+    @PostMapping("/create")
+    public TicketClient create(@RequestBody TicketRequest request,
+                               Long id) {
+        return ticketService.createTicket(request);
+    }
+
+
+     */
 
 
     // Update Ticket close and open

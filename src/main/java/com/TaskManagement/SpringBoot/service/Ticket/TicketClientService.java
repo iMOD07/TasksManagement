@@ -1,9 +1,13 @@
 package com.TaskManagement.SpringBoot.service.Ticket;
 
+import com.TaskManagement.SpringBoot.SecurityUtils;
+import com.TaskManagement.SpringBoot.dto.TicketRequest;
 import com.TaskManagement.SpringBoot.model.*;
 import com.TaskManagement.SpringBoot.repository.TicketClientRepository;
 import com.TaskManagement.SpringBoot.repository.Users.UserClientRepository;
 import com.TaskManagement.SpringBoot.repository.Users.UserEmployeeRepository;
+import com.TaskManagement.SpringBoot.repository.Users.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,19 +17,38 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 
+
 @Service
+@RequiredArgsConstructor
 public class TicketClientService {
 
     @Autowired
-    private TicketClientRepository ticketRepository;
-
+    private final TicketClientRepository ticketRepository;
     @Autowired
     private UserEmployeeRepository employeeRepository;
-
     @Autowired
-    private UserClientRepository clientRepository;
+    private final UserClientRepository clientRepository;
+    @Autowired
+    private UserRepository userRepository;
 
 
+    public TicketClient createTicket(TicketRequest request) {
+        String email = SecurityUtils.getCurrentUserEmail();
+        UserClient client = clientRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Client not found"));
+
+        TicketClient ticket = TicketClient.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .status(TicketStatus.IN_CREATION)
+                .client(client)
+                .build();
+
+        return ticketRepository.save(ticket);
+    }
+
+
+    /*
     public TicketClient createTicket(String title,
                                      String description,
                                      String clientEmail) {
@@ -43,16 +66,16 @@ public class TicketClientService {
         UserEmployee admin = employeeRepository.findFirstByRole(Role.ADMIN)
                 .orElseThrow(() -> new RuntimeException("No ADMIN user found"));
 
-        // 🟢 إنشاء التذكرة
+        // Create Ticket
         TicketClient ticket = new TicketClient();
         ticket.setTitle(title);
         ticket.setDescription(description);
         ticket.setAssignedTo(admin);
         ticket.setClient(client);
-        ticket.setStatus(TicketStatus.OPEN); // عند الإنشاء// ⚠️ تأكد من وجود هذا الحقل في `TicketClient`
+        ticket.setStatus(TicketStatus.IN_CREATION);
 
         return ticketRepository.save(ticket);
-    }
+    } */
 
 
     // Delete Ticket

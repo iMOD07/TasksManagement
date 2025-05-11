@@ -12,4 +12,5 @@ public interface UserClientRepository extends JpaRepository<UserClient, Long> {
     Optional<UserClient> findByEmail(String email);
     Optional<UserClient> findByMobileNumber (String mobileNumber);
 
+
 }

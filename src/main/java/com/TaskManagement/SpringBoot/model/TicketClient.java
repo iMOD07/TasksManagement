@@ -1,8 +1,7 @@
 package com.TaskManagement.SpringBoot.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +9,9 @@ import java.time.LocalDateTime;
 @Table(name = "Ticket")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TicketClient {
 
     @Id
@@ -27,15 +29,26 @@ public class TicketClient {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "assigned_to", nullable = false)
-    private UserEmployee assignedTo;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "client_id", nullable = false)
-    private UserClient client;
+    private AdminUser assignedTo;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TicketStatus status = TicketStatus.OPEN;
+    private TicketStatus status;
 
+    private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id")
+    private UserClient client;
+
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
 }
