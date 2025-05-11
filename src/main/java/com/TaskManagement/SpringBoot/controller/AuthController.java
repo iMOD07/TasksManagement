@@ -73,22 +73,6 @@ public class AuthController {
     }
 
 
-    /*/ Login Admin with out Full Name
-    @PostMapping("/login/admin")
-    public ResponseEntity<AuthResponse> loginAdmin(@RequestBody LoginRequest request) {
-        Optional<AdminUser> adminOptional = adminRepo.findByEmail(request.getEmail());
-
-        if (adminOptional.isEmpty() ||
-                !passwordEncoder.matches(request.getPassword(), adminOptional.get().getPasswordHash())) {
-            return ResponseEntity.status(401).body(new AuthResponse(null, null));
-        }
-
-        AdminUser admin = adminOptional.get();
-        String token = jwtUtil.generateToken(admin.getEmail(), admin.getRole().name());
-
-        return ResponseEntity.ok(new AuthResponse(token, admin.getRole().name()));
-    } */
-
 
     @PostMapping("/login/admin")
     public ResponseEntity<AuthResponse> loginAdmin(@RequestBody LoginRequest request) {
@@ -104,7 +88,6 @@ public class AuthController {
 
         return ResponseEntity.ok(new AuthResponse(token, admin.getRole().name(), admin.getFullName()));
     }
-
 
 
 

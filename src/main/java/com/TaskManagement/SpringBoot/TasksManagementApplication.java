@@ -13,14 +13,3 @@ public class TasksManagementApplication {
 		SpringApplication.run(TasksManagementApplication.class, args);
 	}
 }
-
-
-
-/*
-
-اول شي تطبيقي ال frontend بسويه ب Flutter
-انا ك ادمن
-احتاج اول ما افتح التطبيق تجيني طلبات العملاء اللي هي ال Ticket
-واضغط عليها تفتح لي صفحة انشاء مهمة Task ل الموظف اللي عندي بجدول الموظفين
-
- */

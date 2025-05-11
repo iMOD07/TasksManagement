@@ -4,6 +4,7 @@ import com.TaskManagement.SpringBoot.exception.ResourceLockedException;
 import com.TaskManagement.SpringBoot.exception.ResourceNotFoundException;
 import com.TaskManagement.SpringBoot.model.Role;
 import com.TaskManagement.SpringBoot.repository.TaskRepository;
+import com.TaskManagement.SpringBoot.repository.Users.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,9 @@ public class UserServiceEmployee {
     private UserEmployeeRepository employeeRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private TaskRepository taskRepository;
 
 
@@ -32,14 +36,6 @@ public class UserServiceEmployee {
                                          String mobileNumber,
                                          String department,
                                          String jobTitle) {
-
-        if (employeeRepository.findByEmail(email).isPresent()) {
-            throw new ResourceNotFoundException("This email is already registered.");
-        }
-
-        if (employeeRepository.findByMobileNumber(mobileNumber).isPresent()) {
-            throw new ResourceNotFoundException("This Mobile Number is already registered");
-        }
 
         if (mobileNumber.length() != 10 ) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
