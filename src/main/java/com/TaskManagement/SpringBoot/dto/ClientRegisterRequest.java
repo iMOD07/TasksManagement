@@ -14,4 +14,5 @@ public class ClientRegisterRequest {
     @JsonProperty("companyName")
     private String companyName;
     private String address;
+
 }

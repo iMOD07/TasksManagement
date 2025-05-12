@@ -32,20 +32,21 @@ public class TicketClientService {
     private UserRepository userRepository;
 
 
-    public TicketClient createTicket(TicketRequest request) {
-        String email = SecurityUtils.getCurrentUserEmail();
-        UserClient client = clientRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+    public TicketClient createTicket(TicketRequest request, String email) {
+
+        userServiceClient.repairOrRegisterClient(email);
+
 
         TicketClient ticket = TicketClient.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .status(TicketStatus.IN_CREATION)
-                .client(client)
                 .build();
 
         return ticketRepository.save(ticket);
     }
+
+
 
 
     /*

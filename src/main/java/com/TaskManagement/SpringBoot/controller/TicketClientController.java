@@ -2,10 +2,9 @@ package com.TaskManagement.SpringBoot.controller;
 
 import com.TaskManagement.SpringBoot.SecurityUtils;
 import com.TaskManagement.SpringBoot.dto.TicketRequest;
-import com.TaskManagement.SpringBoot.model.Role;
-import com.TaskManagement.SpringBoot.model.TicketClient;
-import com.TaskManagement.SpringBoot.model.TicketStatus;
-import com.TaskManagement.SpringBoot.model.UserClient;
+import com.TaskManagement.SpringBoot.model.*;
+import com.TaskManagement.SpringBoot.repository.Users.UserClientRepository;
+import com.TaskManagement.SpringBoot.repository.Users.UserRepository;
 import com.TaskManagement.SpringBoot.service.Ticket.TicketClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,14 +21,22 @@ public class TicketClientController {
     @Autowired
     private TicketClientService ticketService;
 
+    @Autowired
+    private UserClientRepository userClientRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
 
-    @PreAuthorize("hasRole('CLIENT')")
     @PostMapping("/create")
+    @PreAuthorize("hasRole('CLIENT')")
     public ResponseEntity<TicketClient> create(@RequestBody TicketRequest request) {
-        TicketClient ticket = ticketService.createTicket(request);
-        return ResponseEntity.ok(ticket);
+        String email = SecurityUtils.getCurrentUserEmail();
+
+        TicketClient created = ticketService.createTicket(request, email);
+        return ResponseEntity.ok(created);
     }
+
 
 
     /*
