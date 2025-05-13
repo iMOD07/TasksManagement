@@ -1,7 +1,6 @@
 package com.TaskManagement.SpringBoot;
 
 import com.TaskManagement.SpringBoot.model.Role;
-import com.TaskManagement.SpringBoot.repository.Users.AdminUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -9,9 +8,7 @@ import org.springframework.stereotype.Component;
 import jakarta.annotation.PostConstruct;
 
 
-import com.TaskManagement.SpringBoot.model.AdminUser;
-
-import com.TaskManagement.SpringBoot.repository.Users.UserEmployeeRepository;
+import com.TaskManagement.SpringBoot.model.UserAdmin;
 
 @Component
 public class AdminInitializer {
@@ -25,7 +22,7 @@ public class AdminInitializer {
     @PostConstruct
     public void init() {
         if (adminRepo.count() == 0) {
-            AdminUser admin = new AdminUser();
+            UserAdmin admin = new UserAdmin();
             admin.setEmail("admin@admin.com");
             admin.setPasswordHash(passwordEncoder.encode("Aa@102030"));
             admin.setFullName("System Admin");

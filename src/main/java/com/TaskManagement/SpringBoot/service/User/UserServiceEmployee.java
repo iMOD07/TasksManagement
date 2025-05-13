@@ -5,16 +5,13 @@ import com.TaskManagement.SpringBoot.exception.ResourceLockedException;
 import com.TaskManagement.SpringBoot.exception.ResourceNotFoundException;
 import com.TaskManagement.SpringBoot.model.Role;
 import com.TaskManagement.SpringBoot.repository.TaskRepository;
-import com.TaskManagement.SpringBoot.repository.Users.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import com.TaskManagement.SpringBoot.model.UserEmployee;
-import com.TaskManagement.SpringBoot.repository.Users.UserEmployeeRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.management.RuntimeErrorException;
 import java.util.Optional;
 import java.util.List;
 

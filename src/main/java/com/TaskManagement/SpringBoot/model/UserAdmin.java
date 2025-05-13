@@ -1,20 +1,20 @@
 package com.TaskManagement.SpringBoot.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-
-@Inheritance(strategy = InheritanceType.JOINED)
-@Table(name = "users")
+@Entity
 @Getter
 @Setter
-@Entity
-public abstract class User {
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Table(name = "user_admin")
+public class UserAdmin implements UserBase {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
 
     @Column(nullable = false, unique = true)
     private String email;

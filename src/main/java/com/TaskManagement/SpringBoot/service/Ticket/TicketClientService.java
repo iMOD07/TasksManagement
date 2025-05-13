@@ -1,12 +1,9 @@
 package com.TaskManagement.SpringBoot.service.Ticket;
 
-import com.TaskManagement.SpringBoot.SecurityUtils;
 import com.TaskManagement.SpringBoot.dto.TicketRequest;
 import com.TaskManagement.SpringBoot.model.*;
 import com.TaskManagement.SpringBoot.repository.TicketClientRepository;
-import com.TaskManagement.SpringBoot.repository.Users.UserClientRepository;
-import com.TaskManagement.SpringBoot.repository.Users.UserEmployeeRepository;
-import com.TaskManagement.SpringBoot.repository.Users.UserRepository;
+import com.TaskManagement.SpringBoot.service.User.UserServiceClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -30,17 +28,25 @@ public class TicketClientService {
     private final UserClientRepository clientRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserServiceClient userServiceClient;
+    @Autowired
+    private AdminUserRepository adminRepository;
 
 
-    public TicketClient createTicket(TicketRequest request, String email) {
+    public TicketClient createTicket(TicketRequest request, String clientEmail, Long adminId) {
+        UserClient client = userServiceClient.loadClientByEmail(clientEmail);
 
-        userServiceClient.repairOrRegisterClient(email);
-
+        UserAdmin admin = adminRepository.findById(adminId)
+                .orElseThrow(() -> new RuntimeException("Admin not found"));
 
         TicketClient ticket = TicketClient.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
+                .createdAt(LocalDateTime.now())
                 .status(TicketStatus.IN_CREATION)
+                .assignedTo(admin)
+                .client(client)
                 .build();
 
         return ticketRepository.save(ticket);

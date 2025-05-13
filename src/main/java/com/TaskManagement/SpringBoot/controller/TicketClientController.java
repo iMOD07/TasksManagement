@@ -3,8 +3,6 @@ package com.TaskManagement.SpringBoot.controller;
 import com.TaskManagement.SpringBoot.SecurityUtils;
 import com.TaskManagement.SpringBoot.dto.TicketRequest;
 import com.TaskManagement.SpringBoot.model.*;
-import com.TaskManagement.SpringBoot.repository.Users.UserClientRepository;
-import com.TaskManagement.SpringBoot.repository.Users.UserRepository;
 import com.TaskManagement.SpringBoot.service.Ticket.TicketClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,11 +29,12 @@ public class TicketClientController {
     @PostMapping("/create")
     @PreAuthorize("hasRole('CLIENT')")
     public ResponseEntity<TicketClient> create(@RequestBody TicketRequest request) {
-        String email = SecurityUtils.getCurrentUserEmail();
-
-        TicketClient created = ticketService.createTicket(request, email);
-        return ResponseEntity.ok(created);
+        String email = SecurityUtils.getCurrentUserEmail(); // استخرج من JWT
+        Long adminId = 1L; // مؤقتاً مخصص لأدمن معين
+        TicketClient ticket = ticketService.createTicket(request, email, adminId);
+        return ResponseEntity.ok(ticket);
     }
+
 
 
 

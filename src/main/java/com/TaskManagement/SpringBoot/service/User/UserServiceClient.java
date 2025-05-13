@@ -1,19 +1,15 @@
 package com.TaskManagement.SpringBoot.service.User;
 
 import com.TaskManagement.SpringBoot.exception.EmailAlreadyExistsException;
-import com.TaskManagement.SpringBoot.exception.GlobalExceptionHandler;
 import com.TaskManagement.SpringBoot.exception.ResourceLockedException;
 import com.TaskManagement.SpringBoot.exception.ResourceNotFoundException;
 import com.TaskManagement.SpringBoot.repository.TicketClientRepository;
-import com.TaskManagement.SpringBoot.repository.Users.UserClientRepository;
-import com.TaskManagement.SpringBoot.repository.Users.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.TaskManagement.SpringBoot.model.Role;
 import com.TaskManagement.SpringBoot.model.UserClient;
-import com.TaskManagement.SpringBoot.repository.Users.UserEmployeeRepository;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -30,6 +26,21 @@ public class UserServiceClient {
 
     @Autowired
     private TicketClientRepository ticketRepository;
+
+
+    // Add new 13-05-2025
+    public UserClient loadClientByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found in users table"));
+
+        if (!(user instanceof UserClient client)) {
+            throw new RuntimeException("User is not a client");
+        }
+
+        return client;
+    }
+
+
 
     // Register Client
     public UserClient registerClient(String fullName,

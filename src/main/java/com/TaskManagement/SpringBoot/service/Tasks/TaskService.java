@@ -4,8 +4,6 @@ import com.TaskManagement.SpringBoot.model.Task;
 import com.TaskManagement.SpringBoot.model.UserClient;
 import com.TaskManagement.SpringBoot.model.UserEmployee;
 import com.TaskManagement.SpringBoot.repository.TaskRepository;
-import com.TaskManagement.SpringBoot.repository.Users.UserClientRepository;
-import com.TaskManagement.SpringBoot.repository.Users.UserEmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;

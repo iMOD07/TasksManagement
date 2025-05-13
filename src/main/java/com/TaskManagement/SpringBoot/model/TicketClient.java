@@ -29,10 +29,10 @@ public class TicketClient {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "assigned_to", nullable = false)
-    private AdminUser assignedTo;
+    private UserAdmin assignedTo;
 
     @Enumerated(EnumType.STRING)
-    private TicketStatus status;
+    private TicketStatus ticketStatus = TicketStatus.IN_PROGRESS;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "client_id")
