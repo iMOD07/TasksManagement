@@ -4,6 +4,7 @@ import com.TaskManagement.SpringBoot.exception.EmailAlreadyExistsException;
 import com.TaskManagement.SpringBoot.exception.ResourceLockedException;
 import com.TaskManagement.SpringBoot.exception.ResourceNotFoundException;
 import com.TaskManagement.SpringBoot.repository.TicketClientRepository;
+import com.TaskManagement.SpringBoot.repository.Users.UserClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,28 +20,11 @@ import java.util.List;
 public class UserServiceClient {
 
     @Autowired
-    private UserClientRepository clientRepository;
+    private UserClientRepository userClientRepository;
+
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private TicketClientRepository ticketRepository;
-
-
-    // Add new 13-05-2025
-    public UserClient loadClientByEmail(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found in users table"));
-
-        if (!(user instanceof UserClient client)) {
-            throw new RuntimeException("User is not a client");
-        }
-
-        return client;
-    }
-
-
+    private TicketClientRepository ticketClientRepository;
 
     // Register Client
     public UserClient registerClient(String fullName,
@@ -54,7 +38,7 @@ public class UserServiceClient {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required");
         }
 
-        if (userRepository.findByEmail(email).isPresent()) {
+        if (userClientRepository.findByEmail(email).isPresent()) {
             throw new EmailAlreadyExistsException("This email is already registered.");
         }
 
@@ -63,7 +47,7 @@ public class UserServiceClient {
                     "You must enter only 10 numbers.");
         }
 
-        if (userRepository.existsByMobileNumber(mobileNumber)) {
+        if (userClientRepository.existsByMobileNumber(mobileNumber)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This mobile number is already registered.");
         }
 
@@ -76,45 +60,44 @@ public class UserServiceClient {
         client.setCompanyName(companyName);
         client.setAddress(address);
         client.setRole(Role.CLIENT);
-        return clientRepository.save(client);
+        return userClientRepository.save(client);
     }
 
     public Optional<UserClient> findByEmail(String email) {
-        return clientRepository.findByEmail(email);
+        return userClientRepository.findByEmail(email);
     }
 
     public Optional<UserClient> findById(Long id) {
-        return clientRepository.findById(id);
+        return userClientRepository.findById(id);
     }
 
 
     // Get all Client
     public List<UserClient> getAllClients() {
-        return clientRepository.findAll();
+        return userClientRepository.findAll();
     }
 
     // Get a client by ID
     public Optional<UserClient> getClientById(Long id) {
-        return clientRepository.findById(id);
+        return userClientRepository.findById(id);
     }
 
 
     public boolean existsById(Long clientId) {
-        return clientRepository.existsById(clientId);
+        return userClientRepository.existsById(clientId);
     }
 
 
     // delete Client
     @Transactional
     public void deleteClient(Long clientId) {
-        UserClient client = clientRepository.findById(clientId)
+        UserClient client = userClientRepository.findById(clientId)
                 .orElseThrow(() -> new ResourceNotFoundException("Client not found"));
 
-        if (ticketRepository.countByClientId(clientId) > 0) {
+        if (ticketClientRepository.existsByClient(client)) {
             throw new ResourceLockedException("Cannot delete Client because there are tickets assigned.");
         }
 
-        clientRepository.delete(client);
+        userClientRepository.delete(client);
     }
-
 }

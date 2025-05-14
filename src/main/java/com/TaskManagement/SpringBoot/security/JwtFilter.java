@@ -1,28 +1,26 @@
 package com.TaskManagement.SpringBoot.security;
 
-import com.TaskManagement.SpringBoot.model.UserAdmin;
-import com.TaskManagement.SpringBoot.model.UserClient;
-import com.TaskManagement.SpringBoot.model.UserEmployee;
+import com.TaskManagement.SpringBoot.model.*;
 import com.TaskManagement.SpringBoot.repository.Users.UserAdminRepository;
 import com.TaskManagement.SpringBoot.repository.Users.UserClientRepository;
 import com.TaskManagement.SpringBoot.repository.Users.UserEmployeeRepository;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
-
 
 @Component
 @RequiredArgsConstructor
@@ -36,7 +34,8 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
 
@@ -50,15 +49,17 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             Object user = findUserByEmail(email);
-            if (user != null) {
-                UserDetails userDetails = mapToUserDetails(user);
 
-                if (jwtUtil.isTokenValid(token, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
+            if (user != null) {
+                UserDetails userDetails = convertToUserDetails(user);
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 
@@ -66,30 +67,27 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private Object findUserByEmail(String email) {
-        return clientRepo.findByEmail(email).orElse(
-                adminRepo.findByEmail(email).orElse(
-                        employeeRepo.findByEmail(email).orElse(null)));
+        return clientRepo.findByEmail(email).<Object>map(c -> c)
+                .orElseGet(() ->
+                        adminRepo.findByEmail(email).<Object>map(a -> a)
+                                .orElseGet(() ->
+                                        employeeRepo.findByEmail(email).orElse(null)
+                                )
+                );
     }
 
-    private UserDetails mapToUserDetails(Object user) {
+    private UserDetails convertToUserDetails(Object user) {
         if (user instanceof UserClient client) {
-            return new org.springframework.security.core.userdetails.User(
-                    client.getEmail(), client.getPasswordHash(),
-                    List.of(new SimpleGrantedAuthority("ROLE_CLIENT"))
-            );
+            return new User(client.getEmail(), client.getPasswordHash(),
+                    List.of(new SimpleGrantedAuthority("ROLE_CLIENT")));
         } else if (user instanceof UserAdmin admin) {
-            return new org.springframework.security.core.userdetails.User(
-                    admin.getEmail(), admin.getPasswordHash(),
-                    List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
-            );
+            return new User(admin.getEmail(), admin.getPasswordHash(),
+                    List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
         } else if (user instanceof UserEmployee emp) {
-            return new org.springframework.security.core.userdetails.User(
-                    emp.getEmail(), emp.getPasswordHash(),
-                    List.of(new SimpleGrantedAuthority("ROLE_EMPLOYEE"))
-            );
+            return new User(emp.getEmail(), emp.getPasswordHash(),
+                    List.of(new SimpleGrantedAuthority("ROLE_EMPLOYEE")));
         }
-        return null;
+
+        throw new RuntimeException("Unknown user type");
     }
 }
-
-

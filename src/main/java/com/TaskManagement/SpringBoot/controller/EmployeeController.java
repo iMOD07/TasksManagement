@@ -25,7 +25,7 @@ public class EmployeeController {
 
 
     // Get All Employees - only ADMIN
-    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE','SUPERVISOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERVISOR')")
     @GetMapping("/")
     public ResponseEntity<List<UserEmployee>> getAllEmployees() {
         List<UserEmployee> employees = employeeService.getAllEmployees();
@@ -33,7 +33,7 @@ public class EmployeeController {
     }
 
     // Get Employee by ID - only Admin
-    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE')")
+    @PreAuthorize("hasRole('ADMIN','SUPERVISOR')")
     @GetMapping("/{id}")
     public ResponseEntity<UserEmployee> getEmployeeById(@PathVariable Long id) {
         Optional<UserEmployee> employee = employeeService.getEmployeeById(id);
@@ -43,7 +43,7 @@ public class EmployeeController {
 
 
     // Delete Account by ADMIN and by EMPLOYEE Yourself
-    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE','EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @DeleteMapping("/{employeeId}")
     public ResponseEntity<String> deleteUserEmployee(@PathVariable Long employeeId,
                                                      Authentication authentication) {
@@ -76,7 +76,7 @@ public class EmployeeController {
 
 
     // Update Role to SUPERVISOR
-    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PutMapping("/updateRole/{employeeId}")
     public ResponseEntity<?> updateEmployeeRole(@PathVariable Long employeeId,
                                                 @RequestParam String role,

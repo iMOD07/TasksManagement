@@ -80,7 +80,7 @@ public class TaskController {
 
 
     // Get Employee by ID
-    @PreAuthorize("hasAnyRole('ADMIN','ADMIN_EMPLOYEE','EMPLOYEE','SUPERVISOR')")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE','SUPERVISOR')")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Task>> getUserTasks(@PathVariable Long userId) {
         return ResponseEntity.ok(taskService.getTasksByUser(userId));

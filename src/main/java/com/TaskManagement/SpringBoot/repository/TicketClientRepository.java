@@ -1,34 +1,23 @@
 package com.TaskManagement.SpringBoot.repository;
 
-import com.TaskManagement.SpringBoot.model.TicketClient;
+import com.TaskManagement.SpringBoot.model.Ticket;
+import com.TaskManagement.SpringBoot.model.TicketStatus;
 import com.TaskManagement.SpringBoot.model.UserClient;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface TicketClientRepository extends JpaRepository<TicketClient, Long> {
+public interface TicketClientRepository extends JpaRepository<Ticket, Long> {
 
     boolean existsByClient(UserClient client);
 
-    List<TicketClient> findByAssignedToId(Long clientId);
+    List<Ticket> findByAssignedToAdmin_Id(Long id); // ✅ FIXED
 
-    List<TicketClient> findByClientId(Long clientId);
+    List<Ticket> findByClientId(Long clientId);
 
-    // Check for tickets associated with a Clients
-    boolean existsByAssignedToId(Long clientId);
+    boolean existsByAssignedToAdmin_Id(Long adminId);
 
-    @Query("SELECT COUNT(t) FROM TicketClient t WHERE t.assignedTo.id = :clientId")
-    long countByClientId(@Param("clientId") Long clientId);
-
-    boolean existsByClientAndStatus(UserClient client, String status);
-
-
-
-
-
-
+    boolean existsByClientAndTicketStatus(UserClient client, TicketStatus status);
 }

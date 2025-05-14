@@ -1,8 +1,10 @@
 package com.TaskManagement.SpringBoot.service.Ticket;
 
-import com.TaskManagement.SpringBoot.dto.TicketRequest;
 import com.TaskManagement.SpringBoot.model.*;
 import com.TaskManagement.SpringBoot.repository.TicketClientRepository;
+import com.TaskManagement.SpringBoot.repository.Users.UserAdminRepository;
+import com.TaskManagement.SpringBoot.repository.Users.UserClientRepository;
+import com.TaskManagement.SpringBoot.repository.Users.UserEmployeeRepository;
 import com.TaskManagement.SpringBoot.service.User.UserServiceClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.List;
-
 
 
 @Service
@@ -22,72 +22,79 @@ public class TicketClientService {
 
     @Autowired
     private final TicketClientRepository ticketRepository;
+
     @Autowired
-    private UserEmployeeRepository employeeRepository;
+    private UserEmployeeRepository userEmployeeRepository;
+
     @Autowired
-    private final UserClientRepository clientRepository;
-    @Autowired
-    private UserRepository userRepository;
+    private final UserClientRepository userClientRepository;
+
     @Autowired
     private UserServiceClient userServiceClient;
+
     @Autowired
-    private AdminUserRepository adminRepository;
+    private UserAdminRepository userAdminRepository;
 
 
-    public TicketClient createTicket(TicketRequest request, String clientEmail, Long adminId) {
-        UserClient client = userServiceClient.loadClientByEmail(clientEmail);
 
-        UserAdmin admin = adminRepository.findById(adminId)
-                .orElseThrow(() -> new RuntimeException("Admin not found"));
+    public Ticket createTicket(String title,
+                               String description,
+                               Long ignoredAssignedToAdmin, // لن تعود بحاجة له
+                               String clientEmail) {
 
-        TicketClient ticket = TicketClient.builder()
-                .title(request.getTitle())
-                .description(request.getDescription())
-                .createdAt(LocalDateTime.now())
-                .status(TicketStatus.IN_CREATION)
-                .assignedTo(admin)
-                .client(client)
-                .build();
+        // 1. استخرج عميل الـ Client من الإيميل
+        UserClient client = userClientRepository.findByEmail(clientEmail)
+                .orElseThrow(() -> new RuntimeException("Client not found"));
+
+        // 2. تأكد أنه ليس لديه تذكرة مفتوحة
+        if (ticketRepository.existsByClient(client)) {
+            throw new RuntimeException("You have an existing ticket.");
+        }
+
+        // 3. ابحث دائماً عن المشرف ID=1
+        UserAdmin admin = userAdminRepository.findById(1L)
+                .orElseThrow(() -> new RuntimeException("Default admin (ID=1) not found"));
+
+        // 4. انشئ التذكرة وعيّن المشرف الثابت
+        Ticket ticket = new Ticket();
+        ticket.setTitle(title);
+        ticket.setDescription(description);
+        ticket.setAssignedToAdmin(admin);
+        ticket.setClient(client);
 
         return ticketRepository.save(ticket);
     }
 
 
-
-
     /*
-    public TicketClient createTicket(String title,
-                                     String description,
-                                     String clientEmail) {
-
-        // Extract the Client from the Email
-        UserClient client = clientRepository.findByEmail(clientEmail)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
-
-        // 🟡 تأكد فقط من عدم وجود تذكرة مفتوحة
-        if (ticketRepository.existsByClientAndStatus(client, "OPEN")) {
-            throw new RuntimeException("You already have an open ticket.");
+    // Create Ticket
+    public Ticket createTicket(String title, String desc, Long assignedToAdminId, String clientEmail) {
+        if (assignedToAdminId == null) {
+            throw new IllegalArgumentException("Assigned Admin ID must not be null");
         }
 
-        // 🔵 جلب أول مسؤول مباشرة بدون تحميل الكل
-        UserEmployee admin = employeeRepository.findFirstByRole(Role.ADMIN)
-                .orElseThrow(() -> new RuntimeException("No ADMIN user found"));
+        UserAdmin admin = userAdminRepository.findById(assignedToAdminId)
+                .orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
 
-        // Create Ticket
-        TicketClient ticket = new TicketClient();
-        ticket.setTitle(title);
-        ticket.setDescription(description);
-        ticket.setAssignedTo(admin);
-        ticket.setClient(client);
-        ticket.setStatus(TicketStatus.IN_CREATION);
+        UserClient client = userClientRepository.findByEmail(clientEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Client not found"));
+
+        Ticket ticket = Ticket.builder()
+                .title(title)
+                .description(desc)
+                .assignedToAdmin(admin)
+                .client(client)
+                .createdAt(LocalDateTime.now())
+                .build();
 
         return ticketRepository.save(ticket);
     } */
 
 
+
     // Delete Ticket
     public void deleteTicket(Long ticketId, Long clientId) {
-        TicketClient ticket = ticketRepository.findById(ticketId)
+        Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
         // check that the ticket holder is the authenticated customer
@@ -98,16 +105,16 @@ public class TicketClientService {
     }
     // Deleted by admin: No ownership verification
     public void deleteTicket(Long ticketId) {
-        TicketClient ticket = ticketRepository.findById(ticketId)
+        Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket Not Found"));
         ticketRepository.delete(ticket);
     }
 
-    public TicketClient updateTicketStatus(Long ticketId, TicketStatus newStatus) {
-        TicketClient ticket = ticketRepository.findById(ticketId)
+    public Ticket updateTicketStatus(Long ticketId, TicketStatus newStatus) {
+        Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
-        ticket.setStatus(newStatus);
+        ticket.setTicketStatus(newStatus);
         return ticketRepository.save(ticket);
     }
 
@@ -115,8 +122,8 @@ public class TicketClientService {
 
 
     // Just Admin He Get All Ticket
-    public List<TicketClient> getAllTicket() {
-        List<TicketClient> all = ticketRepository.findAll();
+    public List<Ticket> getAllTicket() {
+        List<Ticket> all = ticketRepository.findAll();
         if (all.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No Tickets Found");
         }
@@ -124,10 +131,10 @@ public class TicketClientService {
     }
 
 
-    public List<TicketClient> getTicketsByUser(Long userId, UserClient currentClient, boolean isAdmin) {
+    public List<Ticket> getTicketsByUser(Long userId, UserClient currentClient, boolean isAdmin) {
 
         // 1 You must check with the client first
-        UserClient userclient = clientRepository.findById(userId)
+        UserClient userclient = userClientRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         // 2 If you are not an ADMIN and you want to view tickets other than your ticket => forbidden
@@ -136,7 +143,7 @@ public class TicketClientService {
         }
 
         // 3 Get Ticket
-        List<TicketClient> tickets = ticketRepository.findByClientId(userId);
+        List<Ticket> tickets = ticketRepository.findByClientId(userId);
         if (tickets.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No tickets for this user");
         }

@@ -1,14 +1,17 @@
 package com.TaskManagement.SpringBoot.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tasks")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Task {
 
     @Id
@@ -22,7 +25,7 @@ public class Task {
     private String description;
 
     @Column(nullable = false)
-    private String status; // Pending, In Progress, Completed
+    private String status ; // Pending, In Progress, Completed
 
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();

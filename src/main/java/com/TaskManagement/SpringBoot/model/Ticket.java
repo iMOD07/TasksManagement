@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TicketClient {
+public class Ticket {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +29,7 @@ public class TicketClient {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "assigned_to", nullable = false)
-    private UserAdmin assignedTo;
+    private UserAdmin assignedToAdmin ;
 
     @Enumerated(EnumType.STRING)
     private TicketStatus ticketStatus = TicketStatus.IN_PROGRESS;
